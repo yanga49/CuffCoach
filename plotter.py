@@ -8,7 +8,7 @@ def plot():
     ser1.close()
     ser1.open()
 
-    ser2 = serial.Serial("/dev/cu.SLAB_USBtoUART5", 9600)
+    ser2 = serial.Serial("/dev/cu.SLAB_USBtoUART7", 9600)
     ser2.close()
     ser2.open()
 
