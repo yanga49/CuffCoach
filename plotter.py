@@ -34,6 +34,8 @@ def plot():
         xdata.append(i)
         ydata.append(dumbbell)
 
+        xdata = xdata[-50:]
+        ydata = ydata[-50:]
         # dumbbell value of -1 represents tilting about the y-axis
         # prompt user to straighten wrist
         if dumbbell < 0:
