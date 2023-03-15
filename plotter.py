@@ -2,13 +2,13 @@ import serial
 import matplotlib.pyplot as plt
 
 
-def plot():
+def plot(reps):
     # connect to Arduino
-    ser1 = serial.Serial("/dev/cu.SLAB_USBtoUART", 9600)
+    ser1 = serial.Serial("/dev/cu.SLAB_USBtoUART7", 9600)
     ser1.close()
     ser1.open()
 
-    ser2 = serial.Serial("/dev/cu.SLAB_USBtoUART7", 9600)
+    ser2 = serial.Serial("/dev/cu.SLAB_USBtoUART", 9600)
     ser2.close()
     ser2.open()
 
@@ -33,8 +33,8 @@ def plot():
         # append data to plotting array
         xdata.append(i)
         ydata.append(dumbbell)
-        xdata = xdata[-50:]
-        ydata = ydata[-50:]
+        x = xdata[-50:]
+        y = ydata[-50:]
 
         # dumbbell value of -1 represents tilting about the y-axis
         # prompt user to straighten wrist
@@ -51,8 +51,9 @@ def plot():
         elif belt < 0:
             print("You are tilting to the right. Please correct your form.")
         # plot update rate
+        plt.xlim(i-100, i)
         plt.show()
         plt.pause(0.001)
 
 
-plot()
+plot(0)
