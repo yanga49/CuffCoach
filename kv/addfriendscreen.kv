@@ -1,0 +1,49 @@
+<AddFriendScreen>:
+    canvas:
+        Color:
+            rgb: utils.get_color_from_hex("#35477d")
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    FloatLayout:
+        canvas:
+            Color:
+                rgb: utils.get_color_from_hex("#35477d")
+            Rectangle:
+                size: self.size
+                pos: self.pos
+        TextInput:
+            id: add_friend_input
+            hint_text: "Type friend id here"
+            size_hint: .6, .1
+            pos_hint: {"top": .8, "right": .7}
+            on_text:
+                self.focus = not self.focus if "\n" in self.text else self.focus
+
+        ImageButton:
+            source: "icons/next-1.png"
+            size_hint: .2, .1
+            pos_hint: {"top": .8, "right": .9}
+            on_release:
+                app.add_friend(add_friend_input.text)
+        Label:
+            id: add_friend_label
+            size_hint: .8, .1
+            pos_hint: {"top": .5, "right": .9}
+        LabelButton:
+            text: "[u]Back[/u]"
+            canvas.before:
+                Color:
+                    rgb: utils.get_color_from_hex("#35477d") if self.state == 'normal' else utils.get_color_from_hex("#6C5B7B")
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+            size_hint: 1, .1
+            pos_hint: {"top": .1, "right": 1}
+            markup: True
+            on_release:
+                app.change_screen("settings_screen", direction = 'left', mode='pop')
+
+
+
+
