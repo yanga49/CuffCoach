@@ -4,9 +4,12 @@ import numpy as np
 from scipy.signal import lfilter
 import serial
 from datetime import datetime
+
+# Exercises to select from
 exercises = {1: 'Reverse Fly', 2: 'Side-Lying External Rotation', 3: 'Arm Flexion', 4: 'Lying Arm Abduction'}
 
 
+# The plotter class allows users to automatically track their physiotherapy workouts and save results and data.
 class Plotter:
     def __init__(self, repetitions, sets, exercise, weight):
         self.reps = repetitions
@@ -18,17 +21,18 @@ class Plotter:
         self.success = 0
         self.fail = 0
 
+    # Function that writes the date, weight, successful reps, and failed reps to a text file
     def write(self):
         f = open(self.filename, "a")
         f.write(self.date + ',' + str(self.weight) + ',' + str(self.success) + ',' + str(self.fail) + '\n')
         f.close()
 
+    # Function that plots a real-time graph of the exercise and saves the graph as a png
     def plot(self):
         # connect to Arduino
         ser1 = serial.Serial("/dev/cu.SLAB_USBtoUART", 9600)
         ser1.close()
         ser1.open()
-
         # ser2 = serial.Serial("/dev/cu.SLAB_USBtoUART", 9600)
         # ser2.close()
         # ser2.open()
@@ -43,13 +47,15 @@ class Plotter:
         n = 5  # smoothness of curve
         b = [1.0 / n] * n
         a = 1
+
         threshold = 10
         set = 1
         rep = 0
+
         calibrated = False
         prev = -10
-        plt.pause(1)
         full = 70
+        plt.pause(1)
 
         series_f = []
         peaks = []
@@ -57,9 +63,7 @@ class Plotter:
         while set <= self.sets:
             # read data from serial port
             data1 = ser1.readline()
-            # print(data1)
-            # print(data1[0])
-            if data1[0] == 141 or data1[2] == 241:
+            if data1[0] == 141 or data1[2] == 241:  # ignore initializing output
                 dumbbell = -5
             else:
                 dumbbell = float(data1.decode())
@@ -69,7 +73,6 @@ class Plotter:
             # dumbbell = data[j]
             # print(dumbbell)
 
-            # dumbbell value of -2 represents calibration
             if prev == -2 and dumbbell != -2 and dumbbell != -3:
                 calibrated = True
             elif dumbbell == -2:
@@ -83,8 +86,9 @@ class Plotter:
                 print('Calibrating in 5 seconds')
             elif dumbbell == -4:
                 print('To calibrate the gyroscope, place the sensor on a flat surface.')
+            elif dumbbell == -5:
+                print('Initializing...')
             else:
-                print(i)
                 print(dumbbell)
             prev = dumbbell
 
@@ -93,12 +97,14 @@ class Plotter:
                 # append data to plotting array
                 xdata.append(i)
                 ydata.append(dumbbell)
+                # filter data to find local maxima
                 y = lfilter(b, a, ydata)
                 series_f = np.array(y)
+                # the number of peaks = the number of reps
                 peaks, _ = find_peaks(series_f)
                 mins, _ = find_peaks(series_f * -1)
                 rep = len(peaks)
-                x = np.linspace(0, len(xdata), len(series_f))  # figure out what these parameters mean
+                x = np.linspace(0, len(xdata), len(series_f))
 
                 # dumbbell value of -1 represents tilting about the y-axis
                 # prompt user to straighten wrist
@@ -106,10 +112,8 @@ class Plotter:
                     print("Please straighten wrist.")
                 else:
                     plt.plot(xdata, ydata, color='black', label='raw data')  # raw dumbbell data
-                    plt.plot(x[peaks], series_f[peaks], 'x')
+                    # plt.plot(x[peaks], series_f[peaks], 'x')  # peaks
                     # plt.plot(xdata, y, color='blue', label='filtered data')  # filtered dumbbell data
-                    # plt.plot(x[mins], series_f[mins], 'x', label='mins')
-                    # plt.plot(x[peaks], series_f[peaks], '*', label='peaks')
                 i += 1
 
                 # # belt value of 1 represents tilting to the left (y > 10)
@@ -118,12 +122,12 @@ class Plotter:
                 # # belt value of -1 represents tilting to the right (y < -10)
                 # elif belt < 0:
                 #     print("You are tilting to the right. Please correct your form.")
+
                 # plot update rate
-                # plt.xlim(i - 100, i)
                 plt.show()
                 plt.pause(0.001)
 
-            # if the number of rps has been completed, save the graph
+            # if the number of reps has been completed, save the graph and reset for next set
             if rep == self.reps and dumbbell < threshold:
                 i = 0
                 rep = 0
@@ -143,6 +147,5 @@ class Plotter:
         self.write()
 
 
-# start(3, 2, 1, 10)
 my_plotter = Plotter(3, 2, 1, 10)
 my_plotter.plot()
