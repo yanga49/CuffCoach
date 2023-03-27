@@ -3,7 +3,7 @@ sys.path.append("/".join(x for x in __file__.split("/")[:-1]))
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.screenmanager import Screen, NoTransition, CardTransition
-from specialbuttons import ImageButton, LabelButton, ImageButtonSelectable
+from specialbuttons import ImageButton
 from kivy.properties import DictProperty
 from workoutbanner import WorkoutBanner
 from functools import partial
@@ -18,19 +18,23 @@ import json
 import traceback
 from kivy.graphics import Color, RoundedRectangle
 import helperfunctions
-
+from count_reps import Plotter
 
 class HomeScreen(Screen):
     pass
 
+
 class AddFriendScreen(Screen):
     pass
+
 
 class AddWorkoutScreen(Screen):
     pass
 
+
 class FriendWorkoutScreen(Screen):
     pass
+
 
 class FriendsListScreen(Screen):
     pass
@@ -52,7 +56,8 @@ class WorkoutScreen(Screen):
     pass
 
 
-#GUI =   # Make sure this is after all class definitions!
+# GUI =   # Make sure this is after all class definitions!
+
 class MainApp(App):
     my_friend_id = ""
     workout_image = None
@@ -72,7 +77,7 @@ class MainApp(App):
         print("AFTER")
         if platform == 'ios':
             self.refresh_token_file = App.get_running_app().user_data_dir + self.refresh_token_file
-        return Builder.load_file("main.kv")#GUI
+        return Builder.load_file("main.kv")  #GUI
 
     def set_friend_nickname(self, nickname, *args):
         # Make sure they entered something
@@ -100,7 +105,6 @@ class MainApp(App):
                 if w.friend_id == self.their_friend_id:
                     w.update_friend_label_text(their_friend_id_label.text)
 
-
     def update_workout_image(self, filename, widget_id):
         self.previous_workout_image_widget = self.workout_image_widget
         self.workout_image = filename
@@ -108,7 +112,7 @@ class MainApp(App):
         # Clear the indication that the previous image was selected
         if self.previous_workout_image_widget:
             self.previous_workout_image_widget.canvas.before.clear()
-        # Make sure the text color of the label above the scrollview is white (incase it was red from them earlier)
+        # Make sure the data color of the label above the scrollview is white (incase it was red from them earlier)
         select_workout_image_label = self.root.ids.add_workout_screen.ids.select_workout_image_label
         select_workout_image_label.color = (1, 1, 1, 1)
 
@@ -156,7 +160,6 @@ class MainApp(App):
                 if '.png' in f:
                     img = ImageButton(source="icons/workouts/" + f, on_release=partial(self.update_workout_image, f))
                     workout_image_grid.add_widget(img)
-
 
         try:
             # Try to read the persistent signin credentials (refresh token)
@@ -212,11 +215,9 @@ class MainApp(App):
                 friend_banner = FriendBanner(friend_id=friend_id, friend_id_text=friend_id_text)
                 self.root.ids['friends_list_screen'].ids['friends_list_grid'].add_widget(friend_banner)
 
-
             # Get and update streak label
             streak_label = self.root.ids['home_screen'].ids['streak_label']
-            #streak_label.text = str(data['streak']) + " Day Streak" # Thisis updated if there are workouts
-
+            #streak_label.data = str(data['streak']) + " Day Streak" # This is updated if there are workouts
 
             # Set the images in the add_workout_screen
             banner_grid = self.root.ids['home_screen'].ids['banner_grid']
@@ -235,7 +236,7 @@ class MainApp(App):
                     workout = workouts[workout_key]
                     # Populate workout grid in home screen
                     W = WorkoutBanner(workout_image=workout['workout_image'], description=workout['description'],
-                                      type_image=workout['type_image'], number=workout['number'], units=workout['units'],
+                                      number=workout['number'], units=workout['units'],
                                       likes=workout['likes'], date=workout['date'])
                     banner_grid.add_widget(W)
 
@@ -249,7 +250,6 @@ class MainApp(App):
         self.my_friend_id = my_friend_id
         friend_id_label = self.root.ids['settings_screen'].ids['friend_id_label']
         friend_id_label.text = "Friend ID: " + str(self.my_friend_id)
-
 
     def add_friend(self, friend_id):
         friend_id = friend_id.replace("\n","")
@@ -299,6 +299,7 @@ class MainApp(App):
             # Inform them they added a friend successfully
             self.root.ids['add_friend_screen'].ids['add_friend_label'].text = "Friend ID %s added successfully."%friend_id
         print(self.nicknames)
+
     def sign_out_user(self):
         # User wants to log out
         with open(self.refresh_token_file, 'w') as f:
@@ -344,7 +345,7 @@ class MainApp(App):
         # Clear the indication that the previous image was selected
         if self.workout_image_widget:
             self.workout_image_widget.canvas.before.clear()
-        # Make sure the text color of the label above the scrollview is white (incase it was red from them earlier)
+        # Make sure the data color of the label above the scrollview is white (incase it was red from them earlier)
         select_workout_image_label = workout_screen.ids.select_workout_image_label
         select_workout_image_label.color = (1, 1, 1, 1)
 
@@ -409,16 +410,6 @@ class MainApp(App):
             select_workout_image_label.color = (1,0,0,1)
             return
         # They are allowed to leave no description
-        if self.option_choice == None:
-            workout_ids['time_label'].color = (1,0,0,1)
-            workout_ids['distance_label'].color = (1,0,0,1)
-            workout_ids['sets_label'].color = (1,0,0,1)
-            return
-        try:
-            int_quantity = float(quantity_input)
-        except:
-            workout_ids['quantity_input'].background_color = (1,0,0,1)
-            return
         if units_input == "":
             workout_ids['units_input'].background_color = (1,0,0,1)
             return
@@ -448,14 +439,13 @@ class MainApp(App):
 
         # If all data is ok, send the data to firebase real-time database
         workout_payload = {"workout_image": self.workout_image, "description": description_input, "likes": 0,
-                           "number": float(quantity_input), "type_image": self.option_choice, "units": units_input,
+                           "number": float(quantity_input), "units": units_input,
                            "date": month_input + "/" + day_input + "/" + year_input}
         workout_request = requests.post("https://friendly-fitness.firebaseio.com/%s/workouts.json?auth=%s"
                                         %(self.local_id, self.id_token), data=json.dumps(workout_payload))
         # Add the workout to the banner grid in the home screen
         banner_grid = self.root.ids['home_screen'].ids['banner_grid']
-        W = WorkoutBanner(workout_image=self.workout_image, description=description_input,
-                          type_image=self.option_choice, number=float(quantity_input), units=units_input,
+        W = WorkoutBanner(workout_image=self.workout_image, description=description_input, number=float(quantity_input), units=units_input,
                           likes="0", date=month_input + "/" + day_input + "/" + year_input)
         banner_grid.add_widget(W, index=len(banner_grid.children))
 
@@ -545,7 +535,7 @@ class MainApp(App):
         for workout_key in workout_keys:
             workout = workouts[workout_key]
             W = WorkoutBanner(workout_image=workout['workout_image'], description=workout['description'],
-                              type_image=workout['type_image'], number=workout['number'], units=workout['units'],
+                              number=workout['number'], units=workout['units'],
                               likes=workout['likes'],date=workout['date'], likeable=True, workout_key=workout_key)
             friend_banner_grid.add_widget(W)
 
@@ -576,6 +566,21 @@ class MainApp(App):
         screen_manager.transition = CardTransition(direction=direction, mode=mode)
 
         screen_manager.current = screen_name
+
+    def assign_variables(self, exercise):
+        workout_ids = self.root.ids['add_workout_screen'].ids
+        workout_image_grid = self.root.ids['add_workout_screen'].ids['workout_image_grid']
+
+        select_workout_image_label = self.root.ids.add_workout_screen.ids.select_workout_image_label
+        print(str(select_workout_image_label))
+        weight = int(workout_ids['weight_input'].text.replace('\n', ''))
+        goalROM = float(workout_ids['goalROM_input'].text.replace('\n', ''))
+        sets = int(workout_ids['units_input'].text.replace('\n', ''))
+        repetitions = int(workout_ids['quantity_input'].text.replace('\n', ''))
+
+        plotter = Plotter(repetitions, sets, exercise, weight, goalROM)
+
+
 
 
 MainApp().run()

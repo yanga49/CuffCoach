@@ -30,7 +30,7 @@
             pos_hint: {"top": 1, "left": 1}
         ClickableGrid:
             size_hint: .8, .1
-            pos_hint: {"top": .8, "right": .9}
+            pos_hint: {"top": .7, "right": .9}
             on_release:
                 app.change_screen("change_avatar_screen", direction='right', mode='push')
             Image:
@@ -40,17 +40,7 @@
                 markup: True
         ClickableGrid:
             size_hint: .8, .1
-            pos_hint: {"top": .6, "right": .9}
-            on_release:
-                app.change_screen("add_friend_screen", direction = 'right', mode='push')
-            Image:
-                source: "icons/007-add-friend.png"
-            Label:
-                text: "[u]Add A Friend[/u]"
-                markup: True
-        ClickableGrid:
-            size_hint: .8, .1
-            pos_hint: {"top": .4, "right": .9}
+            pos_hint: {"top": .5, "right": .9}
             on_release:
                 app.sign_out_user()
             Image:

@@ -11,21 +11,22 @@ exercises = {1: 'Reverse Fly', 2: 'Side-Lying External Rotation', 3: 'Arm Flexio
 
 # The plotter class allows users to automatically track their physiotherapy workouts and save results and data.
 class Plotter:
-    def __init__(self, repetitions, sets, exercise, weight, target):
+    def __init__(self, repetitions: int, sets: int, exercise: int, weight: int, goalROM: float):
         self.reps = repetitions
         self.sets = sets
         self.exercise = exercises[exercise]
-        self.filename = 'exercise_' + str(exercise) + '.txt'
+        self.filename = 'data/exercise_' + str(exercise) + '.txt'
         self.weight = weight
         self.n = 5  # smoothness of filtered curve
         self.b = [1.0 / self.n] * self.n
         self.a = 1
-        self.target = target - self.n  # adjust target based on filter value
+        self.goalROM = goalROM - self.n  # adjust target based on filter value
         self.date = str(datetime.today())[:10]
         self.success = 0
         self.fail = 0
+        print(repetitions, sets, exercise, weight, goalROM)
 
-    # Function that writes the date, weight, successful reps, and failed reps to a text file
+    # Function that writes the date, weight, successful reps, and failed reps to a data file
     def write(self):
         f = open(self.filename, "a")
         f.write(self.date + ',' + str(self.weight) + ',' + str(self.success) + ',' + str(self.fail) + '\n')
@@ -69,6 +70,7 @@ class Plotter:
 
             data2 = ser2.readline()
             belt = float(data2.decode())
+            print(belt)
 
             if prev == -2 and dumbbell != -2 and dumbbell != -3:
                 calibrated = True
@@ -79,14 +81,17 @@ class Plotter:
                           self.exercise + ' Exercise (' + str(self.weight) + 'lbs)')
                 plt.xlabel('Time (ms)')
                 plt.ylabel('Angle (degrees)')
+                plt.axhline(y=self.goalROM, color='green', linestyle='dashed')
             elif dumbbell == -3:
                 print('Calibrating in 5 seconds')
             elif dumbbell == -4:
                 print('To calibrate dumbbell gyroscope, place the sensor on a flat surface.')
             elif dumbbell == -5:
                 print('Initializing...')
-            else:
-                print(dumbbell)
+            elif not calibrated:
+                print('To begin the next set, press the reset button (EN).')
+            # else:
+            #     print(dumbbell)
             prev = dumbbell
 
             # record data values
@@ -111,20 +116,22 @@ class Plotter:
                     plt.plot(xdata, ydata, color='black', label='raw data')  # raw dumbbell data
                     # plt.plot(x[peaks], series_f[peaks], 'x')  # peaks
                     # plt.plot(xdata, y, color='blue', label='filtered data')  # filtered dumbbell data
-                i += 1
 
                 # # belt value of 1 represents tilting to the left (y > 10)
                 if belt == 1:
                     print("You are tilting to the left. Please correct your form.")
+                    plt.scatter(i, ydata[i], color='blue')
                 # belt value of -1 represents tilting to the right (y < -10)
                 elif belt == -1:
                     print("You are tilting to the right. Please correct your form.")
+                    plt.scatter(i, ydata[i], color='red')
                 elif belt == -2:
                     print("To calibrate belt gyroscope, place the sensor on a flat surface.")
 
+                i += 1
                 # plot update rate
                 plt.show()
-                plt.pause(0.001)
+                # plt.pause(0.001)
 
             # if the number of reps has been completed, save the graph and reset for next set
             if rep == self.reps and dumbbell < threshold:
@@ -132,7 +139,7 @@ class Plotter:
                 rep = 0
                 for peak in series_f[peaks]:
                     print(peak)
-                    if peak < self.target:
+                    if peak < self.goalROM:
                         self.fail += 1
                     else:
                         self.success += 1
@@ -146,5 +153,5 @@ class Plotter:
         self.write()
 
 
-my_plotter = Plotter(3, 2, 1, 10, 70)
-my_plotter.plot()
+# my_plotter = Plotter(3, 2, 1, 10, 70)
+# my_plotter.plot()

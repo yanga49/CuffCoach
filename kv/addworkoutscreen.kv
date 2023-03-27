@@ -18,8 +18,8 @@
             size_hint: 1, .05
             pos_hint: {"top": 1, "right": 1}
         ScrollView:
-            size_hint: 1, .15
-            pos_hint: {"top": .95, "right": 1}
+            size_hint: 1, .30
+            pos_hint: {"top": .95, "right": 1.1}
             GridLayout:
                 canvas:
                     Color:
@@ -33,59 +33,37 @@
                 col_default_width: '100dp'
                 col_force_default: True
                 id: workout_image_grid
-                padding: 7,
+                padding: 15
+                spacing: 30
         TextInput:
             hint_text: "Brief Description"
             size_hint: .8, .1
-            pos_hint: {"top": .75, "right": .9}
+            pos_hint: {"top": .65, "right": .9}
             id: description_input
             on_text:
                 self.focus = not self.focus if "\n" in self.text else self.focus
-        GridLayout:
-            rows: 1
-            size_hint: 1, .15
-            pos_hint: {"top": .60, "right": 1}
-            ImageButton:
-                source: "icons/time.png"
-                on_release:
-                    time_label.color = (1,1,1,1)
-                    distance_label.color = (0,0,0,1)
-                    sets_label.color = (0,0,0,1)
-                    app.option_choice = self.source
-            ImageButton:
-                source: "icons/distance.png"
-                on_release:
-                    distance_label.color = (1,1,1,1)
-                    time_label.color = (0,0,0,1)
-                    sets_label.color = (0,0,0,1)
-                    app.option_choice = self.source
-            ImageButton:
-                source: "icons/sets.png"
-                on_release:
-                    distance_label.color = (0,0,0,1)
-                    time_label.color = (0,0,0,1)
-                    sets_label.color = (1,1,1,1)
-                    app.option_choice = self.source
-        GridLayout:
-            rows: 1
-            size_hint: 1, .05
-            pos_hint: {"top": .45, "right": 1}
-            Label:
-                color: (0,0,0,1)
-                text: "Time"
-                id: time_label
-            Label:
-                color: (0,0,0,1)
-                text: "Distance"
-                id: distance_label
-            Label:
-                color: (0,0,0,1)
-                text: "Sets"
-                id: sets_label
+
+        TextInput:
+            size_hint: .3, .1
+            pos_hint: {"top": .5, "right": .4}
+            hint_text: "Weight"
+            id: weight_input
+            on_text:
+                self.background_color = (1,1,1,1)
+                self.focus = not self.focus if "\n" in self.text else self.focus
+        TextInput:
+            size_hint: .3, .1
+            pos_hint: {"top": .5, "right": .9}
+            hint_text: "Goal ROM"
+            id: goalROM_input
+            on_text:
+                self.background_color = (1,1,1,1)
+                self.focus = not self.focus if "\n" in self.text else self.focus
+
         TextInput:
             size_hint: .3, .1
             pos_hint: {"top": .35, "right": .4}
-            hint_text: "Quantity"
+            hint_text: "Repetitions"
             id: quantity_input
             on_text:
                 self.background_color = (1,1,1,1)
@@ -93,14 +71,14 @@
         TextInput:
             size_hint: .3, .1
             pos_hint: {"top": .35, "right": .9}
-            hint_text: "Units"
+            hint_text: "Sets"
             id: units_input
             on_text:
                 self.background_color = (1,1,1,1)
                 self.focus = not self.focus if "\n" in self.text else self.focus
         TextInput:
             size_hint: .2, .1
-            pos_hint: {"top": .2, "right": .3}
+            pos_hint: {"top": .23, "right": .3}
             hint_text: "MM"
             id: month_input
             on_text:
@@ -108,7 +86,7 @@
                 self.focus = not self.focus if "\n" in self.text else self.focus
         TextInput:
             size_hint: .2, .1
-            pos_hint: {"top": .2, "right": .6}
+            pos_hint: {"top": .23, "right": .6}
             hint_text: "DD"
             id: day_input
             on_text:
@@ -116,7 +94,7 @@
                 self.focus = not self.focus if "\n" in self.text else self.focus
         TextInput:
             size_hint: .2, .1
-            pos_hint: {"top": .2, "right": .9}
+            pos_hint: {"top": .23, "right": .9}
             hint_text: "YY"
             id: year_input
             on_text:
@@ -135,6 +113,7 @@
             markup: True
             on_release:
                 app.change_screen("workout_screen")
+                app.assign_variables(1)
         LabelButton:
             text: "[u]Back[/u]"
             canvas.before:

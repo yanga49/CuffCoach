@@ -55,19 +55,15 @@ class WorkoutBanner(GridLayout):
 
         # Need middle FloatLayout
         middle = FloatLayout()
-        middle_date = Label(text=kwargs['date'], size_hint=(1, .2), pos_hint={"top": .975, "right": 1})
-        middle_image = Image(source=kwargs['type_image'], size_hint=(1, 0.5), pos_hint={"top": .75, "right": 1})
-        middle_label = Label(text=str(kwargs['number']) + " " + kwargs['units'], size_hint=(1, .2), pos_hint={"top": .225, "right": 1})
+        middle_date = Label(text=kwargs['date'], size_hint=(1, .2), pos_hint={"top": .8, "right": 1})
+        middle_label = Label(text="Reps:" + str(kwargs['number']) + " Sets:" + kwargs['units'], size_hint=(1, .2), pos_hint={"top": .4, "right": 1})
         middle.add_widget(middle_date)
-        middle.add_widget(middle_image)
         middle.add_widget(middle_label)
 
         # Need right FloatLayout
         right = FloatLayout()
         right_image = Image(source="icons/likes.png", size_hint=(1, 0.5), pos_hint={"top": .75, "right": 1})
-        self.right_label = Label(text=str(kwargs['likes']) + " fist bumps", size_hint=(1, .2), pos_hint={"top": .225, "right": 1})
         right.add_widget(right_image)
-        right.add_widget(self.right_label)
 
         self.add_widget(left)
         self.add_widget(middle)

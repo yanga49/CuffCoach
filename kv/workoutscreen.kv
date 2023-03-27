@@ -13,6 +13,7 @@
                 size: self.size
                 pos: self.pos
 
+
         LabelButton:
             text: "[u]Back[/u]"
             canvas.before:
@@ -39,4 +40,18 @@
             pos_hint: {"top": .1, "right": 1}
             markup: True
             on_release:
-                app.change_screen("home_screen", direction='right', mode='pop')
+                app.add_workout()
+
+        ScrollView:
+            size_hint: 1, 1.4
+            pos_hint: {"top": 1.5}
+            GridLayout:
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+
+                Image:
+                    source: "image.png"
+                    size_hint_y: None
+                    height: dp(1500)
+                

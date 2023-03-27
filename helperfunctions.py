@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+
 def count_workout_streak(workouts):
     """Count the number of consecutive days that the person has entered a workouts.
 
