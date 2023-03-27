@@ -45,8 +45,6 @@ class ProgressPlot:
         ax.set_xlabel('Category')
         ax.set_ylabel('Value')
         ax.legend()
-
- 
     
         plt.xlabel("Days")
         plt.ylabel("Weight")
@@ -55,8 +53,3 @@ class ProgressPlot:
         plt.show()      
         print(successes)
     plotprogress("data/exercise_1.txt")
-
-    
-
-    
-    

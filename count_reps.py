@@ -63,10 +63,7 @@ class Plotter:
         while set <= self.sets:
             # read data from serial port
             data1 = ser1.readline()
-            if data1[0] == 141 or data1[2] == 241:  # ignore initializing output
-                dumbbell = -5
-            else:
-                dumbbell = float(data1.decode())
+            dumbbell = float(data1.decode())
 
             data2 = ser2.readline()
             belt = float(data2.decode())
@@ -83,13 +80,13 @@ class Plotter:
                 plt.ylabel('Angle (degrees)')
                 plt.axhline(y=self.goalROM, color='green', linestyle='dashed')
             elif dumbbell == -3:
-                print('Calibrating in 5 seconds')
+                print('Calibrating in 5 seconds.')
             elif dumbbell == -4:
                 print('To calibrate dumbbell gyroscope, place the sensor on a flat surface.')
             elif dumbbell == -5:
-                print('Initializing...')
+                print('Begin next set.')
             elif not calibrated:
-                print('To begin the next set, press the reset button (EN).')
+                print('To begin the next set, press the button.')
             # else:
             #     print(dumbbell)
             prev = dumbbell
@@ -153,5 +150,5 @@ class Plotter:
         self.write()
 
 
-# my_plotter = Plotter(3, 2, 1, 10, 70)
-# my_plotter.plot()
+my_plotter = Plotter(3, 2, 1, 10, 70)
+my_plotter.plot()
