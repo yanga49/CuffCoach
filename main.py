@@ -349,10 +349,6 @@ class MainApp(App):
         select_workout_image_label = workout_screen.ids.select_workout_image_label
         select_workout_image_label.color = (1, 1, 1, 1)
 
-
-
-
-
         # Need to clear widgets from previous user's friends list
         friends_list_grid = self.root.ids['friends_list_screen'].ids['friends_list_grid']
         for w in friends_list_grid.walk():
@@ -370,7 +366,6 @@ class MainApp(App):
         for w in friend_banner_grid.walk():
             if w.__class__ == WorkoutBanner:
                 friend_banner_grid.remove_widget(w)
-
 
     def change_avatar(self, image, widget_id):
         # Change avatar in the app
@@ -463,7 +458,6 @@ class MainApp(App):
         # Go back to the home screen
         self.change_screen("home_screen", direction="backwards")
 
-
     def remove_friend(self, friend_id_to_remove, *args):
         # Remove the friend id from the friends list variable
         self.friends_list = self.friends_list.replace(",%s"%friend_id_to_remove, "")
@@ -542,7 +536,6 @@ class MainApp(App):
         # Populate the streak label
         friend_streak_label.text = helperfunctions.count_workout_streak(workouts) + " Day Streak"
 
-
         # Change to the friend_workout_screen
         self.change_screen("friend_workout_screen")
 
@@ -567,18 +560,19 @@ class MainApp(App):
 
         screen_manager.current = screen_name
 
-    def assign_variables(self, exercise):
-        workout_ids = self.root.ids['add_workout_screen'].ids
-        workout_image_grid = self.root.ids['add_workout_screen'].ids['workout_image_grid']
+        # if screen_name == 'workout_screen':
+        #     self.assign_variables()
 
-        select_workout_image_label = self.root.ids.add_workout_screen.ids.select_workout_image_label
-        print(str(select_workout_image_label))
+    def assign_variables(self):
+        workout_ids = self.root.ids['add_workout_screen'].ids
+        exercise = self.workout_image
         weight = int(workout_ids['weight_input'].text.replace('\n', ''))
         goalROM = float(workout_ids['goalROM_input'].text.replace('\n', ''))
         sets = int(workout_ids['units_input'].text.replace('\n', ''))
         repetitions = int(workout_ids['quantity_input'].text.replace('\n', ''))
 
         plotter = Plotter(repetitions, sets, exercise, weight, goalROM)
+        plotter.plot()
 
 
 

@@ -6,15 +6,16 @@ import serial
 from datetime import datetime
 
 # Exercises to select from
+translator = {'american-football.png': 1, 'bars.png': 2, 'weightlifting.png': 3, 'athletics.png': 4}
 exercises = {1: 'Reverse Fly', 2: 'Side-Lying External Rotation', 3: 'Arm Flexion', 4: 'Lying Arm Abduction'}
 
 
 # The plotter class allows users to automatically track their physiotherapy workouts and save results and data.
 class Plotter:
-    def __init__(self, repetitions: int, sets: int, exercise: int, weight: int, goalROM: float):
+    def __init__(self, repetitions: int, sets: int, exercise: str, weight: int, goalROM: float):
         self.reps = repetitions
         self.sets = sets
-        self.exercise = exercises[exercise]
+        self.exercise = exercises[translator[exercise]]
         self.filename = 'data/exercise_' + str(exercise) + '.txt'
         self.weight = weight
         self.n = 5  # smoothness of filtered curve
@@ -24,7 +25,7 @@ class Plotter:
         self.date = str(datetime.today())[:10]
         self.success = 0
         self.fail = 0
-        print(repetitions, sets, exercise, weight, goalROM)
+        print(self.reps, self.sets, self.exercise, self.weight, self.goalROM)
 
     # Function that writes the date, weight, successful reps, and failed reps to a data file
     def write(self):
