@@ -31,13 +31,13 @@ class ProgressPlot:
         fig, ax = plt.subplots()
 
         # Plot the first set of data
-        ax.bar(r1, successes, color='blue', width=bar_width, label='Successful reps')
+        ax.bar(r1, successes, color='green', width=bar_width, label='Successful reps')
 
         # Plot the second set of data, stacked on top of the first set
         ax.bar(r2, fails,color='red', width=bar_width, label='Failed reps')
 
         # Plot the third set of data, grouped with the first two sets
-        ax.bar(r3, weights, color='green', width=bar_width, label='Weight')
+        ax.bar(r3, weights, color='blue', width=bar_width, label='Weight')
 
         # Set the x-axis labels and ticks
         ax.set_xticks([r + bar_width for r in range(len(dates))])
