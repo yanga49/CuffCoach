@@ -150,5 +150,5 @@ class Plotter:
         self.write()
 
 
-my_plotter = Plotter(3, 2, 1, 10, 70)
-my_plotter.plot()
+# my_plotter = Plotter(3, 2, 1, 10, 70)
+# my_plotter.plot()
