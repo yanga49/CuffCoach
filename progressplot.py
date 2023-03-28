@@ -9,10 +9,12 @@ class ProgressPlot:
         weights = []
         successes = []
         fails = []
+        i = 0
         file = open(filename, 'r')
         for line in file:
             temp = line.rstrip().split(",")
-            dates.append(temp[0])
+            i += 1
+            dates.append(i)
             weights.append(int(temp[1]))
             successes.append(temp[2])
             fails.append(temp[3])
@@ -29,13 +31,13 @@ class ProgressPlot:
         fig, ax = plt.subplots()
 
         # Plot the first set of data
-        ax.bar(r1, successes, color='blue', width=bar_width, label='Data 1')
+        ax.bar(r1, successes, color='blue', width=bar_width, label='Successful reps')
 
         # Plot the second set of data, stacked on top of the first set
-        ax.bar(r1, fails, bottom=successes, color='red', width=bar_width, label='Data 2')
+        ax.bar(r2, fails,color='red', width=bar_width, label='Failed reps')
 
         # Plot the third set of data, grouped with the first two sets
-        ax.bar(r2, weights, color='green', width=bar_width, label='Data 3')
+        ax.bar(r3, weights, color='green', width=bar_width, label='Weight')
 
         # Set the x-axis labels and ticks
         ax.set_xticks([r + bar_width for r in range(len(dates))])
@@ -48,7 +50,7 @@ class ProgressPlot:
     
         plt.xlabel("Days")
         plt.ylabel("Weight")
-        plt.title(filename)
+        plt.title("Progess Chart")
         plt.legend()
         plt.show()      
         print(successes)
