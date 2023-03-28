@@ -4,6 +4,7 @@ import numpy as np
 from scipy.signal import lfilter
 import serial
 from datetime import datetime
+import time
 
 # Exercises to select from
 translator = {'american-football.png': 1, 'bars.png': 2, 'weightlifting.png': 3, 'athletics.png': 4}
@@ -61,17 +62,20 @@ class Plotter:
         series_f = []
         peaks = []
 
+        start = None
+
         while set <= self.sets:
             # read data from serial port
             data1 = ser1.readline()
             dumbbell = float(data1.decode())
+            print(dumbbell)
 
             data2 = ser2.readline()
             belt = float(data2.decode())
-            print(belt)
 
             if prev == -2 and dumbbell != -2 and dumbbell != -3:
                 calibrated = True
+                start = time.time()
             elif dumbbell == -2:
                 print('Calibrating')
                 calibrated = False
@@ -94,45 +98,49 @@ class Plotter:
 
             # record data values
             if calibrated:
-                # append data to plotting array
-                xdata.append(i)
-                ydata.append(dumbbell)
-                # filter data to find local maxima
-                y = lfilter(self.b, self.a, ydata)
-                series_f = np.array(y)
-                # the number of peaks = the number of reps
-                peaks, _ = find_peaks(series_f)
-                mins, _ = find_peaks(series_f * -1)
-                rep = len(peaks)
-                x = np.linspace(0, len(xdata), len(series_f))
-
                 # dumbbell value of -1 represents tilting about the y-axis
                 # prompt user to straighten wrist
                 if dumbbell == -1:
                     print("Please straighten wrist.")
                 else:
+                    # append data to plotting array
+                    xdata.append(i)
+                    ydata.append(dumbbell)
+                    # filter data to find local maxima
+                    y = lfilter(self.b, self.a, ydata)
+                    series_f = np.array(y)
+                    # the number of peaks = the number of reps
+                    peaks, _ = find_peaks(series_f)
+                    mins, _ = find_peaks(series_f * -1)
+                    rep = len(peaks)
+                    x = np.linspace(0, len(xdata), len(series_f))
                     plt.plot(xdata, ydata, color='black', label='raw data')  # raw dumbbell data
                     # plt.plot(x[peaks], series_f[peaks], 'x')  # peaks
                     # plt.plot(xdata, y, color='blue', label='filtered data')  # filtered dumbbell data
 
-                # # belt value of 1 represents tilting to the left (y > 10)
-                if belt == 1:
-                    print("You are tilting to the left. Please correct your form.")
-                    plt.scatter(i, ydata[i], color='blue')
-                # belt value of -1 represents tilting to the right (y < -10)
-                elif belt == -1:
-                    print("You are tilting to the right. Please correct your form.")
-                    plt.scatter(i, ydata[i], color='red')
-                elif belt == -2:
-                    print("To calibrate belt gyroscope, place the sensor on a flat surface.")
+                    # # belt value of 1 represents tilting to the left (y > 10)
+                    if belt == 1:
+                        print("You are tilting to the left. Please correct your form.")
+                        plt.scatter(i, ydata[i], color='blue')
+                    # belt value of -1 represents tilting to the right (y < -10)
+                    elif belt == -1:
+                        print("You are tilting to the right. Please correct your form.")
+                        plt.scatter(i, ydata[i], color='red')
+                    elif belt == -2:
+                        print("To calibrate belt gyroscope, place the sensor on a flat surface.")
 
-                i += 1
+                    i += 1
+
                 # plot update rate
                 plt.show()
                 # plt.pause(0.001)
 
             # if the number of reps has been completed, save the graph and reset for next set
-            if rep == self.reps and dumbbell < threshold:
+            end = time.time()
+            if start is None:
+                pass
+            elif (rep == self.reps and threshold > dumbbell >= 0) or end - start > 30:
+                start = None
                 i = 0
                 rep = 0
                 for peak in series_f[peaks]:

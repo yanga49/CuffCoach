@@ -20,6 +20,7 @@ from kivy.graphics import Color, RoundedRectangle
 import helperfunctions
 from count_reps import Plotter
 
+
 class HomeScreen(Screen):
     pass
 
@@ -120,7 +121,6 @@ class MainApp(App):
         with self.workout_image_widget.canvas.before:
             Color(rgb=(kivy.utils.get_color_from_hex("#6C5B7B")))
             RoundedRectangle(size=self.workout_image_widget.size, pos=self.workout_image_widget.pos, radius = [5,])
-
 
     def on_start(self):
         # Display the ads
