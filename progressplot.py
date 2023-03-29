@@ -2,9 +2,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from datetime import datetime
 
+
 class ProgressPlot:
 
-    def plotprogress(filename):
+    def plotprogress(self, filename):
         dates = []
         weights = []
         successes = []
@@ -18,8 +19,7 @@ class ProgressPlot:
             weights.append(int(temp[1]))
             successes.append(temp[2])
             fails.append(temp[3])
-        
-        
+
         bar_width = 0.25
 
         # Set the positions of the bars on the x-axis
@@ -34,7 +34,7 @@ class ProgressPlot:
         ax.bar(r1, successes, color='green', width=bar_width, label='Successful reps')
 
         # Plot the second set of data, stacked on top of the first set
-        ax.bar(r2, fails,color='red', width=bar_width, label='Failed reps')
+        ax.bar(r2, fails, color='red', width=bar_width, label='Failed reps')
 
         # Plot the third set of data, grouped with the first two sets
         ax.bar(r3, weights, color='blue', width=bar_width, label='Weight')
