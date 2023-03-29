@@ -6,35 +6,48 @@ import serial
 from datetime import datetime
 import time
 
-# Exercises to select from
+# exercises to select from
 translator = {'american-football.png': 1, 'bars.png': 2, 'weightlifting.png': 3, 'athletics.png': 4}
 exercises = {1: 'Reverse Fly', 2: 'Side-Lying External Rotation', 3: 'Arm Flexion', 4: 'Lying Arm Abduction'}
 
+'''
+The Plotter class allows users to automatically track their physiotherapy workouts and save results and data.
+    - Begin each set by pressing the button on the device
+    - Set is terminated automatically when number of reps has been reached or when max time is exceeded
+    - At the end of each set, a graph of the ROM data is saved to the graphs folder
+    - At the end of all sets, the total number of successful and failed reps are saved to the data folder
+'''
 
-# The plotter class allows users to automatically track their physiotherapy workouts and save results and data.
+
 class Plotter:
     def __init__(self, repetitions: int, sets: int, exercise: str, weight: int, goalROM: float):
+        # initialize exercise variables
         self.reps = repetitions
         self.sets = sets
         self.exercise = exercises[translator[exercise]]
-        self.filename = 'data/exercise_' + str(exercise) + '.txt'
+        self.max_time = 7 * repetitions
+        # initialize name/title variables
+        self.filename = 'data/exercise_' + str(translator[exercise]) + '.txt'
         self.weight = weight
+        # initialize filtering variables
         self.n = 5  # smoothness of filtered curve
         self.b = [1.0 / self.n] * self.n
         self.a = 1
+        # initialize progress tracking variables
         self.goalROM = goalROM - self.n  # adjust target based on filter value
         self.date = str(datetime.today())[:10]
         self.success = 0
         self.fail = 0
-        print(self.reps, self.sets, self.exercise, self.weight, self.goalROM)
 
-    # Function that writes the date, weight, successful reps, and failed reps to a data file
+        # print(self.reps, self.sets, self.exercise, self.weight, self.goalROM)
+
+    # write() function writes the date, weight, successful reps, and failed reps to a data file
     def write(self):
         f = open(self.filename, "a")
         f.write(self.date + ',' + str(self.weight) + ',' + str(self.success) + ',' + str(self.fail) + '\n')
         f.close()
 
-    # Function that plots a real-time graph of the exercise and saves the graph as a png
+    # plot() function plots a real-time graph of the exercise and saves the graph as a png
     def plot(self):
         # connect to Arduino
         ser1 = serial.Serial("/dev/cu.SLAB_USBtoUART", 9600)
@@ -44,38 +57,46 @@ class Plotter:
         ser2.close()
         ser2.open()
 
-        # create plot
+        # create plot and initialize x-variables
         plt.ion()
         xdata = []
         ydata = []
         i = 0
         j = 0
 
+        # initialize rep/set count variables
         threshold = 10
         set = 1
         rep = 0
 
+        # initialize calibration variables
         calibrated = False
         prev = -10
         plt.pause(1)
 
+        # initialize filtered data arrays
         series_f = []
         peaks = []
 
         start = None
 
+        # continue loop until all sets are completed
         while set <= self.sets:
-            # read data from serial port
+            # read dumbbell data from serial port
             data1 = ser1.readline()
             dumbbell = float(data1.decode())
-            print(dumbbell)
+            # print(dumbbell)
 
+            # read belt data from serial port
             data2 = ser2.readline()
             belt = float(data2.decode())
 
+            # CALIBRATION CODE
+            # if just finished calibrating, take start time
             if prev == -2 and dumbbell != -2 and dumbbell != -3:
                 calibrated = True
                 start = time.time()
+            # dumbbell value of -2 represents calibrating
             elif dumbbell == -2:
                 print('Calibrating')
                 calibrated = False
@@ -84,32 +105,36 @@ class Plotter:
                 plt.xlabel('Time (ms)')
                 plt.ylabel('Angle (degrees)')
                 plt.axhline(y=self.goalROM, color='green', linestyle='dashed')
+            # dumbbell value of -3 represents pre-calibration
             elif dumbbell == -3:
                 print('Calibrating in 5 seconds.')
+            # dumbbell value of -4 represents uncalibrated gyroscope
             elif dumbbell == -4:
                 print('To calibrate dumbbell gyroscope, place the sensor on a flat surface.')
+            # dumbbell value of -5 represents button pressed
             elif dumbbell == -5:
                 print('Begin next set.')
+            # if dumbbell is not calibrated, prompt user to press button
             elif not calibrated:
                 print('To begin the next set, press the button.')
-            # else:
-            #     print(dumbbell)
+            # keep track of previous value to determine start/end of calibration
             prev = dumbbell
 
-            # record data values
+            # DATA COLLECTION CODE
             if calibrated:
                 # dumbbell value of -1 represents tilting about the y-axis
-                # prompt user to straighten wrist
                 if dumbbell == -1:
+                    # prompt user to straighten wrist, don't plot values
                     print("Please straighten wrist.")
                 else:
+                    print("Good form! Keep it up!")
                     # append data to plotting array
                     xdata.append(i)
                     ydata.append(dumbbell)
-                    # filter data to find local maxima
+                    # filter data to find local maxima and keep track of reps
                     y = lfilter(self.b, self.a, ydata)
                     series_f = np.array(y)
-                    # the number of peaks = the number of reps
+                    # number of peaks = the number of reps
                     peaks, _ = find_peaks(series_f)
                     mins, _ = find_peaks(series_f * -1)
                     rep = len(peaks)
@@ -118,16 +143,18 @@ class Plotter:
                     # plt.plot(x[peaks], series_f[peaks], 'x')  # peaks
                     # plt.plot(xdata, y, color='blue', label='filtered data')  # filtered dumbbell data
 
-                    # # belt value of 1 represents tilting to the left (y > 10)
-                    if belt == 1:
-                        print("You are tilting to the left. Please correct your form.")
-                        plt.scatter(i, ydata[i], color='blue')
-                    # belt value of -1 represents tilting to the right (y < -10)
-                    elif belt == -1:
-                        print("You are tilting to the right. Please correct your form.")
-                        plt.scatter(i, ydata[i], color='red')
-                    elif belt == -2:
-                        print("To calibrate belt gyroscope, place the sensor on a flat surface.")
+                    # belt value of 1 represents tilting to the left (y > 10)
+                    if self.exercise == 'Reverse Fly':
+                        if belt == 1:
+                            print("You are tilting to the left. Please correct your form.")
+                            plt.scatter(i, ydata[i], color='blue')
+                        # belt value of -1 represents tilting to the right (y < -10)
+                        elif belt == -1:
+                            print("You are tilting to the right. Please correct your form.")
+                            plt.scatter(i, ydata[i], color='red')
+                        # belt value of -2 represents uncalibrated gyroscope
+                        elif belt == -2:
+                            print("To calibrate belt gyroscope, place the sensor on a flat surface.")
 
                     i += 1
 
@@ -135,11 +162,13 @@ class Plotter:
                 plt.show()
                 # plt.pause(0.001)
 
-            # if the number of reps has been completed, save the graph and reset for next set
+            # take end time to check if max time has elapsed
             end = time.time()
             if start is None:
                 pass
-            elif (rep == self.reps and threshold > dumbbell >= 0) or end - start > 30:
+            # once the set has been completed (#reps) or max time exceeded,
+            # save the graph and reset variables for next set
+            elif (rep == self.reps and threshold > dumbbell >= 0) or end - start > self.max_time:
                 start = None
                 i = 0
                 rep = 0
@@ -156,6 +185,7 @@ class Plotter:
                 set += 1
                 calibrated = False
             j += 1
+        # append data to progress plot data
         self.write()
 
 
