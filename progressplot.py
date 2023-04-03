@@ -2,10 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from datetime import datetime
 
-
 class ProgressPlot:
 
-    def plotprogress(self, filename):
+    def plotprogress(filename, exercisename):
         dates = []
         weights = []
         successes = []
@@ -17,9 +16,10 @@ class ProgressPlot:
             i += 1
             dates.append(i)
             weights.append(int(temp[1]))
-            successes.append(temp[2])
-            fails.append(temp[3])
-
+            successes.append(int(temp[2]))
+            fails.append(int(temp[3]))
+        
+        
         bar_width = 0.25
 
         # Set the positions of the bars on the x-axis
@@ -34,24 +34,24 @@ class ProgressPlot:
         ax.bar(r1, successes, color='green', width=bar_width, label='Successful reps')
 
         # Plot the second set of data, stacked on top of the first set
-        ax.bar(r2, fails, color='red', width=bar_width, label='Failed reps')
+        ax.bar(r2, fails,color='red', width=bar_width, label='Failed reps')
 
         # Plot the third set of data, grouped with the first two sets
         ax.bar(r3, weights, color='blue', width=bar_width, label='Weight')
 
         # Set the x-axis labels and ticks
-        ax.set_xticks([r + bar_width for r in range(len(dates))])
-        ax.set_xticklabels(dates)
-
-        # Set the axis labels and legend
-        ax.set_xlabel('Category')
-        ax.set_ylabel('Value')
+        ax.set_xlabel("Days")
+        ax.set_ylabel("Reps", color='blue')
+        ax.tick_params(axis='y', labelcolor='blue')
+        ax.set_yticks(np.arange(0,max(weights),1))
         ax.legend()
-    
-        plt.xlabel("Days")
-        plt.ylabel("Weight")
-        plt.title("Progess Chart")
-        plt.legend()
-        plt.show()      
-        print(successes)
-    plotprogress("data/exercise_1.txt")
+
+        ax2 = ax.twinx()
+        ax2.set_ylabel('Weight', color='red')
+        
+        ax2.set_yticks(np.arange(0, max(weights), 1))
+
+        plt.title("Progress Chart of " + exercisename)
+        plt.show()
+
+    #plotprogress("data/exercise_1.txt", "Reverse Fly")
