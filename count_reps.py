@@ -34,6 +34,7 @@ class Plotter:
         self.b = [1.0 / self.n] * self.n
         self.a = 1
         # initialize progress tracking variables
+        self.horizontal = goalROM
         self.goalROM = goalROM - self.n  # adjust target based on filter value
         self.date = str(datetime.today())[:10]
         self.success = 0
@@ -104,7 +105,7 @@ class Plotter:
                           self.exercise + ' Exercise (' + str(self.weight) + 'lbs)')
                 plt.xlabel('Time (ms)')
                 plt.ylabel('Angle (degrees)')
-                plt.axhline(y=self.goalROM, color='green', linestyle='dashed')
+                plt.axhline(y=self.horizontal, color='green', linestyle='dashed')
             # dumbbell value of -3 represents pre-calibration
             elif dumbbell == -3:
                 print('Calibrating in 5 seconds.')
