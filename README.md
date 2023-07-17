@@ -1,6 +1,4 @@
-# Friendly-Fitness-App
-Python mobile app using kivy
+# Cuff Coach
 
-Follow along with the video series on my YouTube channel: https://www.youtube.com/channel/UCMMitT9SCbWlEcEkemnsxQg
-
-Screwed up the branches after the 11th video, my apologies!
+View our slide deck here!
+https://docs.google.com/presentation/d/1mGmO_bQSA4b74otvLZWZuowCaFdBYXRSRDbB799GFNU/edit?usp=sharing
